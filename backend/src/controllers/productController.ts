@@ -3,7 +3,41 @@ import prisma from '../prisma';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
+    const { search, category, minPrice, maxPrice, sort } = req.query;
+
+    const where: any = {};
+
+    if (search) {
+      where.name = { contains: String(search), mode: 'insensitive' };
+    }
+
+    if (category && category !== 'All Categories') {
+      // Find category by name first, since categoryId in the schema is a UUID pointing to Category model
+      const categoryRecord = await prisma.category.findUnique({
+        where: { name: String(category) }
+      });
+      if (categoryRecord) {
+        where.categoryId = categoryRecord.id;
+      } else {
+        // If category doesn't exist in DB, return empty
+        res.json([]);
+        return;
+      }
+    }
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = Number(minPrice);
+      if (maxPrice) where.price.lte = Number(maxPrice);
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+    if (sort === 'price_asc') orderBy = { price: 'asc' };
+    if (sort === 'price_desc') orderBy = { price: 'desc' };
+
     const products = await prisma.product.findMany({
+      where,
+      orderBy,
       include: {
         category: true,
         reviews: true
