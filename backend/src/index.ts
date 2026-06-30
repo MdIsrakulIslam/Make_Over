@@ -7,6 +7,7 @@ import morgan from 'morgan';
 import productRoutes from './routes/productRoutes';
 import userRoutes from './routes/userRoutes';
 import cartRoutes from './routes/cartRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
 
 const app: Express = express();
 const port = process.env.PORT || 5000;
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Cosmetics E-commerce API is running');

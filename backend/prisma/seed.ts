@@ -1,9 +1,22 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import "dotenv/config";
+import prisma from '../src/prisma';
+import bcrypt from 'bcryptjs';
 
 async function main() {
   console.log('Seeding database...');
+
+  // Create Admin User
+  const adminPassword = await bcrypt.hash('password123', 10);
+  await prisma.user.upsert({
+    where: { email: 'admin@makeover.com' },
+    update: { password: adminPassword, role: 'ADMIN' },
+    create: {
+      name: 'Admin User',
+      email: 'admin@makeover.com',
+      password: adminPassword,
+      role: 'ADMIN',
+    },
+  });
 
   // Create Categories
   const skincare = await prisma.category.upsert({
