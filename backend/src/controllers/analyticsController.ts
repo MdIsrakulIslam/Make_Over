@@ -128,6 +128,22 @@ export const getDashboardAnalytics = async (req: Request, res: Response) => {
              order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
     }));
 
+    // ----- Inventory Alerts -----
+    const lowStockAlerts = await prisma.product.findMany({
+      where: {
+        stock: {
+          lte: 5 // Alert for products with 5 or less stock
+        }
+      },
+      select: {
+        id: true,
+        name: true,
+        stock: true,
+        imageUrl: true
+      },
+      orderBy: { stock: 'asc' }
+    });
+
     res.json({
       stats: {
         revenue: totalRevenue,
@@ -137,7 +153,8 @@ export const getDashboardAnalytics = async (req: Request, res: Response) => {
       },
       revenueData,
       engagementData,
-      recentOrders: formattedRecentOrders
+      recentOrders: formattedRecentOrders,
+      lowStockAlerts
     });
   } catch (error) {
     console.error("Dashboard analytics error:", error);
