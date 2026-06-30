@@ -23,6 +23,7 @@ model User {
   orders    Order[]
   reviews   Review[]
   cart      Cart?
+  wishlist  Wishlist?
 }
 
 enum Role {
@@ -41,9 +42,10 @@ model Product {
   categoryId  String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  reviews     Review[]
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
+  reviews       Review[]
+  orderItems    OrderItem[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
 }
 
 model Category {
@@ -112,4 +114,24 @@ model CartItem {
   updatedAt DateTime @updatedAt
   
   @@unique([cartId, productId])
+}
+
+model Wishlist {
+  id        String         @id @default(uuid())
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String         @unique
+  items     WishlistItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  wishlistId String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  createdAt  DateTime @default(now())
+  
+  @@unique([wishlistId, productId])
 }
